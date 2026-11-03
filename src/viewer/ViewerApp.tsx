@@ -58,7 +58,10 @@ export function ViewerApp(props: {
   // A reference opens its own rev; a rev-less one opens uncommitted changes locally.
   const select = (next: SourceSelection) => {
     setSelection(next);
-    setPanelRev(next.reference.rev ?? (local ? WORKING : documentRev));
+    setPanelRev(
+      next.reference.rev ??
+        (local || props.mode === "export" ? WORKING : documentRev),
+    );
   };
   // A local viewer always has git changes to show.
   const hasSourceDiffs =
@@ -141,11 +144,7 @@ export function ViewerApp(props: {
             <div className={actions}>
               <CopyCommentsButton
                 title={title}
-                source={
-                  local
-                    ? meta?.file
-                    : `${window.location.origin}${window.location.pathname}`
-                }
+                source={local ? meta?.file : window.location.href.split("#")[0]}
               />
               {hasSourceDiffs && (
                 <DiffButton

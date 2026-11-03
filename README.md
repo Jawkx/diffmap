@@ -98,6 +98,41 @@ instead of the rendered HTML. Use the URL printed by `serve`:
 curl -H 'Accept: text/markdown' http://127.0.0.1:<port>/
 ```
 
+## Export an offline HTML file
+
+From your local checkout:
+
+```sh
+npm run cli -- export specs/my-change.md --output review.html
+```
+
+With the CLI installed, use `diffmap export specs/my-change.md --output review.html`.
+The output defaults to a `.html` file beside the Markdown. `--root` sets the
+workspace used for source references. Existing output files are never overwritten.
+
+Open the HTML directly in a browser or send it to a reviewer. It includes the
+interactive viewer, diagrams, code highlighting, referenced source files, and
+the revisions named by the document. It needs no server, GitHub account, or
+network connection. Uncommitted changes are captured when a changes card names
+them. Source references without a revision use the captured workspace contents.
+
+Local PNG, JPEG, GIF, WebP, AVIF, and ICO images are embedded, with paths relative
+to the Markdown file and contained within `--root`. Remote images, SVG images,
+and raw HTML currently produce an error. External hyperlinks remain links.
+Arbitrary Git range selection and Ctrl/Cmd-click definition navigation require
+the local viewer. Binary changes have metadata but no text diff.
+
+Comments stay in the reader's browser; **Download comments** saves feedback as
+Markdown. Adding comments does not modify the exported HTML. Exports include
+full referenced files and both versions of changed text files.
+
+Run export tests with `npm run test:export`. To also exercise the exported file
+in an offline browser, set `DIFFMAP_TEST_BROWSER` to a Chromium executable:
+
+```sh
+DIFFMAP_TEST_BROWSER=/usr/bin/chromium npm run test:export
+```
+
 ## Share a spec with a link (experimental)
 
 Share an unlisted gist and print a `diffmap.dev` link (requires [`gh`](https://cli.github.com/) logged in). Does not start a local server:

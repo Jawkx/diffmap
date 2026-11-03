@@ -569,6 +569,8 @@ export function SourceDiffPanel(props: {
         onClick={onHeaderClick}
       >
         <CodeView
+          // The same file id can have different contents in another revision.
+          key={page.rev}
           ref={viewer}
           className={code}
           items={commentedItems}

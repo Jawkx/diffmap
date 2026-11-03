@@ -17,6 +17,7 @@ import type { SourceNavigation } from "../annotations.js";
 import { markDiagramChanges } from "./diagramDiff.js";
 import { linkDiagram } from "./diagramLinks.js";
 import { fenceTitle, pierreShell } from "./pierre.js";
+import { useViewerMode } from "./viewerMode.ts";
 
 type MermaidProps = {
   source: string;
@@ -81,6 +82,7 @@ export function MermaidBlock(props: MermaidProps) {
 }
 
 function MermaidDiagram(props: MermaidProps & { fullscreen: boolean }) {
+  const mode = useViewerMode();
   const container = useRef<HTMLDivElement>(null);
   const shell = useStyles(
     styles.shell,
@@ -97,6 +99,7 @@ function MermaidDiagram(props: MermaidProps & { fullscreen: boolean }) {
         surface: backgroundColor.element,
         border: colors.gray[6],
         font: fontFamily,
+        offline: mode === "export",
       });
     const all = draw(props.source);
     if (all instanceof Error || props.sides === undefined) return all;
@@ -105,7 +108,7 @@ function MermaidDiagram(props: MermaidProps & { fullscreen: boolean }) {
     const proposed = draw(props.sides.proposed);
     if (proposed instanceof Error) return proposed;
     return markDiagramChanges(all, { today, proposed });
-  }, [props.source, props.sides]);
+  }, [props.source, props.sides, mode]);
   const linked = useMemo(
     () => (svg instanceof Error ? svg : linkDiagram(svg, props.annotations)),
     [svg, props.annotations],

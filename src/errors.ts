@@ -50,6 +50,11 @@ export class DiffmapShareError extends errore.createTaggedError({
   message: "diffmap share failed: $reason",
 }) {}
 
+export class DiffmapExportError extends errore.createTaggedError({
+  name: "DiffmapExportError",
+  message: "diffmap export failed: $reason",
+}) {}
+
 export class DiffmapUpdateError extends errore.createTaggedError({
   name: "DiffmapUpdateError",
   message: "diffmap update failed: $reason",

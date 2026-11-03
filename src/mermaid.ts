@@ -33,10 +33,11 @@ export function mermaidSvg(input: {
   surface: string;
   border: string;
   font: string;
+  offline?: boolean;
 }) {
   return errore.try({
-    try: () =>
-      renderMermaidSVG(input.source, {
+    try: () => {
+      const svg = renderMermaidSVG(input.source, {
         bg: input.bg,
         fg: input.fg,
         accent: input.accent,
@@ -45,7 +46,10 @@ export function mermaidSvg(input: {
         border: input.border,
         font: input.font,
         transparent: true,
-      }),
+      });
+      // Beautiful Mermaid emits Google Fonts imports even for a system-font stack.
+      return input.offline ? svg.replace(/@import url\([^)]*\);/g, "") : svg;
+    },
     catch: (cause) =>
       new DiffmapMermaidError({
         path: "spec",

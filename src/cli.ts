@@ -6,6 +6,7 @@ import { packageVersion } from "./packageVersion.js";
 import { listRunningDiffmaps } from "./registry.js";
 import { startServer } from "./serve.js";
 import { shareMarkdownFile } from "./share.js";
+import { exportMarkdownFile } from "./export.js";
 import {
   detectInstallMethod,
   fetchLatestVersion,
@@ -56,12 +57,12 @@ async function* runServe(c: ServeContext) {
 }
 
 const cli = Cli.create("diffmap", {
-  description: "Serve a spec locally, or share it as a gist",
+  description: "Serve a spec locally, export offline HTML, or share a gist",
   version: packageVersion,
   args: serveArgs,
   options: serveOptions,
   output: serveOutput,
-  hint: "`serve <spec.md>` runs the local viewer. `share <spec.md>` publishes an unlisted gist. `update` (or `--update`) installs the latest diffmap.",
+  hint: "`serve <spec.md>` runs the local viewer. `export <spec.md>` writes offline HTML. `share <spec.md>` publishes an unlisted gist. `update` (or `--update`) installs the latest diffmap.",
   examples: [
     {
       args: { file: "spec.md" },
@@ -70,6 +71,34 @@ const cli = Cli.create("diffmap", {
   ],
   run: runServe,
 })
+  .command("export", {
+    description: "Write a self-contained HTML viewer that works offline",
+    args: serveArgs,
+    options: z.object({
+      output: z
+        .string()
+        .optional()
+        .describe("Output .html path (default: beside the Markdown file)"),
+      root: z
+        .string()
+        .optional()
+        .describe("Workspace root for source snapshots"),
+    }),
+    output: z.object({ file: z.string(), bytes: z.number() }),
+    async run(c) {
+      const result = await exportMarkdownFile({
+        filePath: resolveFromInvokeCwd(c.args.file),
+        workspaceRoot: resolveFromInvokeCwd(c.options.root ?? "."),
+        outputPath:
+          c.options.output === undefined
+            ? undefined
+            : resolveFromInvokeCwd(c.options.output),
+      });
+      if (result instanceof Error)
+        return c.error({ code: "DIFFMAP", message: result.message });
+      return c.ok(result);
+    },
+  })
   .command("serve", {
     description: "Run the local viewer server",
     args: serveArgs,
